@@ -3,11 +3,15 @@ package ru.saprykinav.familyhub.entity;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import ru.saprykinav.familyhub.repository.RoleRepository;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -15,37 +19,38 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode
 
-public class Customer implements UserDetails {
-    private Long id;
-    private String username;
-    private String name;
-    private String password;
-
-    @Transient
-    @ManyToMany(fetch = FetchType.LAZY)
-    private Set<Role> roles;
-
+public class Customer implements UserDetails, Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     @Column(name = "id")
+    private Long id;
+    @Column(name = "username")
+    private String username;
+    @Column(name = "name")
+    private String name;
+    @Column(name = "password")
+    private String password;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;
+
+    @Transient
+    @Autowired
+    RoleRepository roleRepository;
+
+
     public Long getId() {
         return id;
     }
 
-    @Basic
-    @Column(name = "username")
     public String getUsername() {
         return username;
     }
 
-    @Basic
-    @Column(name = "name")
     public String getName() {
         return name;
     }
 
-    @Basic
-    @Column(name = "password")
     public String getPassword() {
         return password;
     }
@@ -53,7 +58,6 @@ public class Customer implements UserDetails {
     public Set<Role> getRoles() {
         return roles;
     }
-
     @Override
     public boolean isAccountNonExpired() {
         return true;

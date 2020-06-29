@@ -6,25 +6,27 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Role implements GrantedAuthority {
-    private Integer id;
-    private String role;
-
-    @GeneratedValue(strategy = GenerationType.IDENTITY )
+public class Role implements GrantedAuthority, Serializable {
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
+    private Integer id;
+    @Column(name = "role")
+    private String role;
+    @Transient
+    @ManyToMany(mappedBy = "roles")
+    private Set<Customer> users;
+
     public Integer getId() {
         return id;
     }
 
-
-    @Basic
-    @Column(name = "role", nullable = false, length = 5)
     public String getRole() {
         return role;
     }
