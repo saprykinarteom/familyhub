@@ -34,6 +34,9 @@ public class Customer implements UserDetails, Serializable {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Family> families;
+
     @Transient
     @Autowired
     RoleRepository roleRepository;
