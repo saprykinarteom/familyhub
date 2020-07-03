@@ -6,5 +6,5 @@ import ru.saprykinav.familyhub.entity.Customer;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-     Customer findByUsername(String username);
+    Customer findByUsername(String username);
 }

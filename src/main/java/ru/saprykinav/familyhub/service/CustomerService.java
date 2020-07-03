@@ -7,11 +7,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.saprykinav.familyhub.entity.Customer;
+import ru.saprykinav.familyhub.entity.Role;
 import ru.saprykinav.familyhub.repository.CustomerRepository;
 import ru.saprykinav.familyhub.repository.RoleRepository;
 
 
 import java.util.Collections;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -27,39 +29,35 @@ public class CustomerService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Customer customer = customerRepository.findByUsername(username);
-
         if (customer == null) {
             throw new UsernameNotFoundException("User not found");
         }
-
         return customer;
     }
 
-    public Customer findCustomerById(Long userId) {
+    public Customer findCustomerById(Long userId) throws NoSuchElementException {
         Optional<Customer> userFromDb = customerRepository.findById(userId);
-        //сюда можно ебануть роль
-        return userFromDb.orElse(new Customer());
+        if (userFromDb.isEmpty()) {
+            throw new NoSuchElementException("User not found") ;
+        }
+        return userFromDb.get();
     }
-
+//добавление и обновление пользователя
     public boolean saveCustomer(Customer customer) {
+        if (customer.getId() == null) {
         Customer customerFromDB = customerRepository.findByUsername(customer.getUsername());
-
         if (customerFromDB != null) {
             return false;
         }
-        //это нахуй не нужно по идее, надо проверить
-        customer.setRoles(Collections.singleton(roleRepository.findById(1).get()));
+        customer.setRoles(Collections.singleton(new Role(1, "ROLE_USER")));
         customer.setPassword(bCryptPasswordEncoder.encode(customer.getPassword()));
-        customerRepository.save(customer);
+        } customerRepository.save(customer);
         return true;
     }
 
     public boolean deleteUser(Long userId) {
-        if (customerRepository.findById(userId).isPresent()) {
-            customerRepository.deleteById(userId);
-            return true;
-        }
-        return false;
+        customerRepository.deleteById(userId);
+        return true;
     }
 }
 

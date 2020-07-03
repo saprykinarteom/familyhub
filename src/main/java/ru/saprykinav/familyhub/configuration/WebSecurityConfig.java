@@ -32,7 +32,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //Доступ только для не зарегистрированных пользователей
                 .antMatchers("/registration").not().fullyAuthenticated()
                 //Доступ только для пользователей с ролью USER
-                .antMatchers("/welcome", "/visit", "/").hasRole("USER")
+                .antMatchers("buy").hasRole("USER")
                 //Доступ разрешен всем пользователей
                 .antMatchers("/resources/**").permitAll()
                 //Все остальные страницы требуют аутентификации
@@ -42,7 +42,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin()
                 .loginPage("/login")
                 //Перенарпавление на главную страницу после успешного входа
-                .defaultSuccessUrl("/welcome")
+                .defaultSuccessUrl("/home")
                 .permitAll()
                 .and()
                 .logout()

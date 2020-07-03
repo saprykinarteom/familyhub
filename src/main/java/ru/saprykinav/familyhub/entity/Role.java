@@ -23,6 +23,11 @@ public class Role implements GrantedAuthority, Serializable {
     @ManyToMany(mappedBy = "roles")
     private Set<Customer> users;
 
+    public Role(Integer id, String name) {
+        this.id = id;
+        this.role = name;
+    }
+
     public Integer getId() {
         return id;
     }
