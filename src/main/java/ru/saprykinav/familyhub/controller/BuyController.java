@@ -10,6 +10,8 @@ import ru.saprykinav.familyhub.entity.Buy;
 import ru.saprykinav.familyhub.entity.Customer;
 import ru.saprykinav.familyhub.service.BuyService;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -25,6 +27,24 @@ public class BuyController {
         } catch (NotFoundException e) {
             e.printStackTrace();
             return new ResponseEntity("customers buys not found", HttpStatus.BAD_REQUEST);
+        }
+    }
+    @GetMapping("/last")
+    public ResponseEntity<List<Buy>> getAllInLastMount(@AuthenticationPrincipal Customer customer) throws NotFoundException {
+        try {
+            return ResponseEntity.ok(buyService.findAllInLastMonth(customer.getId()));
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+            return new ResponseEntity("customers buys not found", HttpStatus.BAD_REQUEST);
+        }
+    }
+    @GetMapping("/last/sum")
+    public ResponseEntity<BigDecimal> getSumAllInLastMount(@AuthenticationPrincipal Customer customer) throws NotFoundException {
+        try {
+            return ResponseEntity.ok(buyService.getLastMonthBuys(customer.getId()));
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+            return new ResponseEntity("not working", HttpStatus.BAD_REQUEST);
         }
     }
 

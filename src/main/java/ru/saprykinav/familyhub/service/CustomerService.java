@@ -7,11 +7,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.saprykinav.familyhub.entity.Customer;
+import ru.saprykinav.familyhub.entity.Family;
 import ru.saprykinav.familyhub.entity.Role;
 import ru.saprykinav.familyhub.repository.CustomerRepository;
 import ru.saprykinav.familyhub.repository.RoleRepository;
 
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -50,6 +52,7 @@ public class CustomerService implements UserDetailsService {
             return false;
         }
         customer.setRoles(Collections.singleton(new Role(1, "ROLE_USER")));
+        customer.setFamilies(Collections.singleton((new Family((long) 2))));
         customer.setPassword(bCryptPasswordEncoder.encode(customer.getPassword()));
         } customerRepository.save(customer);
         return true;
@@ -59,5 +62,6 @@ public class CustomerService implements UserDetailsService {
         customerRepository.deleteById(userId);
         return true;
     }
+
 }
 
