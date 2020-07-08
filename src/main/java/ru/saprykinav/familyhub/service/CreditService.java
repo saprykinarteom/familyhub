@@ -6,8 +6,10 @@ import org.springframework.stereotype.Service;
 import ru.saprykinav.familyhub.entity.Credit;
 import ru.saprykinav.familyhub.repository.CreditRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CreditService {
@@ -29,6 +31,13 @@ public class CreditService {
             throw new NotFoundException("Credits not found");
         }
         return credits;
+    }
+    public BigDecimal getLastMonthCredits (Long customerId) throws NotFoundException  {
+        LocalDate dateFrom = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
+        LocalDate dateTo = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
+        Optional<BigDecimal> lastMonthCredits = creditRepository.findSumPriceAllByCustomerIdAndDateBetween(customerId, dateFrom, dateTo);
+        if(lastMonthCredits.isEmpty()) throw new NotFoundException("Credits not found");
+        return lastMonthCredits.get();
     }
     public Credit saveCredit (Credit credit) {
         return creditRepository.save(credit);

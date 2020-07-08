@@ -11,6 +11,7 @@ import ru.saprykinav.familyhub.entity.Credit;
 import ru.saprykinav.familyhub.entity.Customer;
 import ru.saprykinav.familyhub.service.CreditService;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,5 +43,15 @@ public class CreditController {
     @PostMapping("/add")
     public ResponseEntity<Credit> addCredit(@AuthenticationPrincipal Customer customer, @RequestBody Credit credit){
         return ResponseEntity.ok(creditService.saveCredit(credit));
+    }
+
+    @GetMapping("/last/sum")
+    public ResponseEntity<BigDecimal> getSumAllInLastMount(@AuthenticationPrincipal Customer customer) throws NotFoundException {
+        try {
+            return ResponseEntity.ok(creditService.getLastMonthCredits(customer.getId()));
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+            return new ResponseEntity("Credits not found", HttpStatus.BAD_REQUEST);
+        }
     }
 }

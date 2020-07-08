@@ -44,7 +44,7 @@ public class BuyController {
             return ResponseEntity.ok(buyService.getLastMonthBuys(customer.getId()));
         } catch (NotFoundException e) {
             e.printStackTrace();
-            return new ResponseEntity("not working", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("Buys not found", HttpStatus.BAD_REQUEST);
         }
     }
 
