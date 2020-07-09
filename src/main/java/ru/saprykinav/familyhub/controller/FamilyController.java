@@ -4,10 +4,9 @@ import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import ru.saprykinav.familyhub.entity.Customer;
 import ru.saprykinav.familyhub.entity.Family;
 import ru.saprykinav.familyhub.service.FamilyService;
 
@@ -27,4 +26,16 @@ public class FamilyController {
             return new ResponseEntity("Family not found", HttpStatus.BAD_REQUEST);
         }
     }
+    @GetMapping("/")
+    public ResponseEntity<Family> findFamilyByCustomerId(@AuthenticationPrincipal Customer customer) throws NotFoundException {
+        try {
+            Family familyFromDB = familyService.findByFamilyId(customer.getFamily().getId());
+            return ResponseEntity.ok(familyFromDB);
+
+        } catch (NotFoundException e) {
+            e.printStackTrace();
+            return new ResponseEntity("huy", HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

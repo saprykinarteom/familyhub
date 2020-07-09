@@ -52,7 +52,7 @@ public class CustomerService implements UserDetailsService {
             return false;
         }
         customer.setRoles(Collections.singleton(new Role(1, "ROLE_USER")));
-        customer.setFamilies(Collections.singleton((new Family((long) 2))));
+        customer.setFamily((new Family((long) 2)));
         customer.setPassword(bCryptPasswordEncoder.encode(customer.getPassword()));
         } customerRepository.save(customer);
         return true;

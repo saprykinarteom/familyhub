@@ -8,10 +8,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.saprykinav.familyhub.entity.Buy;
 import ru.saprykinav.familyhub.entity.Customer;
+import ru.saprykinav.familyhub.entity.Family;
 import ru.saprykinav.familyhub.service.BuyService;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -50,6 +50,9 @@ public class BuyController {
 
     @PostMapping("/add")
     public ResponseEntity<Buy> addBuy(@AuthenticationPrincipal Customer customer, @RequestBody Buy buy){
+        Family familyForUpd = customer.getFamily();
         return ResponseEntity.ok(buyService.saveBuy(buy));
     }
+
+
 }

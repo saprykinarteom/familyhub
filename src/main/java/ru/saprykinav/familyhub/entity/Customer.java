@@ -34,13 +34,12 @@ public class Customer implements UserDetails, Serializable {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Family> families;
+    public Family getFamily() {
+        return family;
+    }
 
-    @Transient
-    @Autowired
-    RoleRepository roleRepository;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Family family;
 
     public Long getId() {
         return id;

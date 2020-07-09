@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
@@ -20,21 +21,17 @@ public class Family implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "last_month_buys")
-    private Long lastMonthBuys;
-
-    @Column(name = "last_month_credits")
-    private Long lastMonthCredits;
+    @Transient
+    private BigDecimal lastMonthBuys;
 
     @Column(name = "mandatory_spending")
-    private Long mandatorySpending;
+    private BigDecimal mandatorySpending;
 
     public Family(Long id) {
         this.id = id;
     }
 
     @Transient
-    @ManyToMany(mappedBy = "families")
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
     private Set<Customer> customers;
-
 }
