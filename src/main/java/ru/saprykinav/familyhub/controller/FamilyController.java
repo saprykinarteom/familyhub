@@ -34,7 +34,7 @@ public class FamilyController {
 
         } catch (NotFoundException e) {
             e.printStackTrace();
-            return new ResponseEntity("huy", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("Family not found", HttpStatus.BAD_REQUEST);
         }
     }
 
