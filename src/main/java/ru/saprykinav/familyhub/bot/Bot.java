@@ -2,8 +2,7 @@ package ru.saprykinav.familyhub.bot;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
+
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -62,11 +61,11 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public void input(Message inMessage) throws TelegramApiException {
-        if(inMessage.getText().contains("Помощь")){
-            sendMessage("А это будет позже\n" + "но можешь узнать кто ты. Просто спроси меня об этом");
+        if(inMessage.getText().contains("help") || inMessage.getText().contains("Помощь")){
+            help();
         }
         else if (inMessage.getText().contains("Вход")) {
-            sendMessage("Привет, " + customer.getName() + "Набери /помощь для открытия списка доступных действий");
+            sendMessage("Привет, " + customer.getName() + "\n" + Messages.ENTRY.getText());
         }
         //тест
         else if(inMessage.getText().contains("Кто "+"я")){
@@ -87,7 +86,7 @@ public class Bot extends TelegramLongPollingBot {
             Optional<Customer> customerFromDB = botService.authorization(inMessage);
 
             if (customerFromDB.isEmpty()) {
-                sendMessage("Пользователь с таким именем не найден. Проверьте, привязан ли Ваш телеграм аккаунт к Вашему профилю в системе");
+                sendMessage(Messages.AUTHORIZATIONERROR.getText());
                 throw new NoSuchElementException("Customer not found");
             }
             customer = customerFromDB.get();
@@ -109,5 +108,8 @@ public class Bot extends TelegramLongPollingBot {
         catch (TelegramApiException e){
             e.printStackTrace();
         }
+    }
+    public void help() throws TelegramApiException {
+        sendMessage(Messages.HELP.getText());
     }
 }

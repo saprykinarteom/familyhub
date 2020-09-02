@@ -24,7 +24,7 @@ public class FamilyService {
         familyRepository.save(family);
         return true;
     }
-    public Family findByFamilyId(Long familyId) throws NotFoundException {
+    public Family loadByFamilyId(Long familyId) throws NotFoundException {
         Optional<Family> familyFromDb = familyRepository.findById(familyId);
         if(familyFromDb.isEmpty()){
             throw new NotFoundException("Family not found");
