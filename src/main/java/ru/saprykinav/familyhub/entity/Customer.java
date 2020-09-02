@@ -94,5 +94,9 @@ public class Customer implements UserDetails, Serializable {
     public String getPassword() {
         return password;
     }
+    @Override
+    public String toString() {
+        return this.getName();
+    }
 }
 

@@ -1,5 +1,6 @@
 package ru.saprykinav.familyhub.bot;
 
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +10,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.saprykinav.familyhub.entity.Customer;
-import ru.saprykinav.familyhub.service.BotService;
 import ru.saprykinav.familyhub.service.CustomerService;
 
 import java.util.NoSuchElementException;
@@ -34,12 +34,9 @@ public class Bot extends TelegramLongPollingBot {
             if (update.hasMessage() && update.getMessage().hasText()) {
                 //Извлекаем объект входящего сообщения
                 Message inMessage = update.getMessage();
+                System.out.println(inMessage.getText());
                 //проверяем авторизован ли пользователь
                 if(!inMessage.getChatId().equals(chat_id)) {
-                    System.out.println(inMessage.getText());
-                    System.out.println(inMessage.getChat().getUserName());
-                    customerService.test();
-                    System.out.println(customerService.loadCustomerByTgUsername("SaprykinAV").get().getId());
                     authorization(inMessage);
                 }
                 //обрабатываем команду
@@ -47,7 +44,7 @@ public class Bot extends TelegramLongPollingBot {
                     input(inMessage);
                 }
             }
-        } catch (TelegramApiException e) {
+        } catch (TelegramApiException | NotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -60,24 +57,20 @@ public class Bot extends TelegramLongPollingBot {
         return "1372106827:AAGa_JAk-eMRfWnYQeBWkUhljuSOCiXyejc";
     }
 
-    public void input(Message inMessage) throws TelegramApiException {
-        if(inMessage.getText().contains("help") || inMessage.getText().contains("Помощь")){
-            help();
-        }
-        else if (inMessage.getText().contains("Вход")) {
-            sendMessage("Привет, " + customer.getName() + "\n" + Messages.ENTRY.getText());
-        }
-        //тест
-        else if(inMessage.getText().contains("Кто "+"я")){
-            if(customer.getTgUsername().equals("SaprykinAV")){
-                sendMessage("Жмых");
-            }
-            else if (customer.getTgUsername().equals("Zlary")) {
-                sendMessage("Жмыха");
-            }
-        }
-        else {
-            sendMessage("напиши что-нибудь другое");
+    public void input(Message inMessage) throws TelegramApiException, NotFoundException {
+        switch (inMessage.getText()) {
+            case "/help" :
+            case "Помощь" :
+                sendMessage(Messages.HELP.getText());
+                break;
+            case "Вход" : sendMessage("Привет, " + customer.getName() + "\n" + Messages.ENTRY.getText());
+                break;
+            case "Семья" :
+                sendMessage(botService.getFamilyInfo(customer));
+                break;
+            case "Кто я" : sendMessage(customer.getName());
+                break;
+            default : sendMessage(Messages.SENDELSE.getText());
         }
     }
     //функция авторизации и ее проверки.
@@ -93,7 +86,7 @@ public class Bot extends TelegramLongPollingBot {
             chat_id = inMessage.getChatId();
             input(inMessage);
         }
-        catch (TelegramApiException e){
+        catch (TelegramApiException | NotFoundException e){
             e.printStackTrace();
         }
     }
@@ -108,8 +101,5 @@ public class Bot extends TelegramLongPollingBot {
         catch (TelegramApiException e){
             e.printStackTrace();
         }
-    }
-    public void help() throws TelegramApiException {
-        sendMessage(Messages.HELP.getText());
     }
 }

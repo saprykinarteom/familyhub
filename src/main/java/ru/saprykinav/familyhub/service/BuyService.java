@@ -35,11 +35,11 @@ public class BuyService  {
     public Buy saveBuy (Buy buy) {
             return buyRepository.save(buy);
     }
-    public BigDecimal getLastMonthBuys (Long customerId) throws NotFoundException  {
+    public BigDecimal getLastMonthBuys (Long customerId)  {
         LocalDate dateFrom = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
         LocalDate dateTo = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
         Optional<BigDecimal> lastMonthBuys = buyRepository.findSumPriceAllByCustomerIdAndDateBetween(customerId, dateFrom, dateTo);
-        if(lastMonthBuys.isEmpty()) throw new NotFoundException("Buys not found");
+        if(lastMonthBuys.isEmpty()) lastMonthBuys = Optional.of(BigDecimal.valueOf(0));
         return lastMonthBuys.get();
     }
 }

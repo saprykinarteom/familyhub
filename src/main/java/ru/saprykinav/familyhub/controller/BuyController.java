@@ -39,13 +39,8 @@ public class BuyController {
         }
     }
     @GetMapping("/last/sum")
-    public ResponseEntity<BigDecimal> getSumAllInLastMount(@AuthenticationPrincipal Customer customer) throws NotFoundException {
-        try {
-            return ResponseEntity.ok(buyService.getLastMonthBuys(customer.getId()));
-        } catch (NotFoundException e) {
-            e.printStackTrace();
-            return new ResponseEntity("Buys not found", HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<BigDecimal> getSumAllInLastMount(@AuthenticationPrincipal Customer customer){
+          return ResponseEntity.ok(buyService.getLastMonthBuys(customer.getId()));
     }
 
     @PostMapping("/add")

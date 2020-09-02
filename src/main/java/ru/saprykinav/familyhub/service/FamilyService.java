@@ -33,6 +33,7 @@ public class FamilyService {
         LocalDate dateFrom = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
         LocalDate dateTo = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
         Optional<BigDecimal> sumBuysFromDB = familyRepository.findSumPriceAllByFamilyByCustomerIdAndDateBetween(familyId,dateFrom, dateTo);
+        if(sumBuysFromDB.isEmpty()) sumBuysFromDB = Optional.of(BigDecimal.ZERO);
         familyFromDb.get().setLastMonthBuys(sumBuysFromDB.get());
 
         //подгрузка списка членов семьи
