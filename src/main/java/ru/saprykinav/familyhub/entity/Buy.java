@@ -1,5 +1,6 @@
 package ru.saprykinav.familyhub.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,8 +20,9 @@ public class Buy implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "customer_id")
-    private Long customerId;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Customer customer;
 
     @Column(name = "price")
     private BigDecimal price;
@@ -28,15 +30,19 @@ public class Buy implements Serializable {
     @Column(name = "date")
     private LocalDate date;
 
+    public Buy(Customer customer, BigDecimal price){
+        this.customer = customer;
+        this.price = price;
+        this.date = LocalDate.now();
+    }
 
     public Long getId() {
         return id;
     }
 
-    public Long getCustomerId() {
-        return customerId;
+    public Customer getCustomer() {
+        return customer;
     }
-
 
     public BigDecimal getPrice() {
         return price;
@@ -44,5 +50,12 @@ public class Buy implements Serializable {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    @Override
+    public String toString() {
+        return  customer.getName() +
+                " " + price +
+                " " + date;
     }
 }

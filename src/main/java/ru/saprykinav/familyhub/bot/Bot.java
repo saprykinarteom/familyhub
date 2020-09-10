@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.saprykinav.familyhub.bot.service.BotBuyService;
 import ru.saprykinav.familyhub.entity.Customer;
 import ru.saprykinav.familyhub.service.CustomerService;
 
@@ -22,11 +23,12 @@ public class Bot extends TelegramLongPollingBot {
     BotService botService;
     @Autowired
     CustomerService customerService;
+    @Autowired
+    BotBuyService botBuyService;
 
     private Long chat_id = Long.valueOf(0);
     private Customer customer;
-
-
+    private int state = 0;
 
     public void onUpdateReceived(Update update) {
         try {
@@ -40,6 +42,7 @@ public class Bot extends TelegramLongPollingBot {
                     authorization(inMessage);
                 }
                 //обрабатываем команду
+                //
                 else{
                     input(inMessage);
                 }
@@ -58,19 +61,38 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public void input(Message inMessage) throws TelegramApiException, NotFoundException {
-        switch (inMessage.getText()) {
-            case "/help" :
-            case "Помощь" :
-                sendMessage(Messages.HELP.getText());
+        switch (state){
+            case 0:
+                switch (inMessage.getText()) {
+                    case "/help" :
+                    case "Помощь" :
+                        sendMessage(Messages.HELP.getText());
+                        break;
+                    case "Вход" : sendMessage("Привет, " + customer.getName() + "\n" + Messages.ENTRY.getText());
+                        break;
+                    case "Семья" :
+                        sendMessage(botService.getFamilyInfo(customer));
+                        break;
+                    case "Добавить покупку" :
+                        sendMessage(Messages.ADDBUY.getText());
+                        state = 1;
+                        break;
+                    case "Кто я" : sendMessage(customer.getName());
+                        break;
+                    default : sendMessage(Messages.SENDELSE.getText());
+                }
                 break;
-            case "Вход" : sendMessage("Привет, " + customer.getName() + "\n" + Messages.ENTRY.getText());
-                break;
-            case "Семья" :
-                sendMessage(botService.getFamilyInfo(customer));
-                break;
-            case "Кто я" : sendMessage(customer.getName());
-                break;
-            default : sendMessage(Messages.SENDELSE.getText());
+            case 1:
+                switch (inMessage.getText()) {
+                    case "Отмена":
+                        sendMessage(Messages.CANCEL.getText());
+                        state = 0;
+                        break;
+                    default:
+                        sendMessage(botBuyService.addBuy(inMessage.getText(),customer));
+                        state = 0;
+                        break;
+                }
         }
     }
     //функция авторизации и ее проверки.

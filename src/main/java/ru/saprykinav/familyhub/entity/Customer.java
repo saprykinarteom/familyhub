@@ -13,6 +13,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -40,6 +41,10 @@ public class Customer implements UserDetails, Serializable {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     private Family family;
+    @JsonIgnore
+    @Transient
+    @OneToMany(mappedBy = "buy", fetch = FetchType.EAGER)
+    private List<Buy> buys;
 
     public Family getFamily() {
         return family;
