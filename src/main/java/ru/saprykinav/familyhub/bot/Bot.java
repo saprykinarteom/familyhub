@@ -63,33 +63,51 @@ public class Bot extends TelegramLongPollingBot {
                 switch (inMessage.getText()) {
                     case "/help" :
                     case "Помощь" :
-                        sendMessage(Messages.HELP.getText(), inMessage);
+                        sendMessage(inMessage, Messages.HELP.getText());
                         break;
-                    case "Вход" : sendMessage("Привет, " + getCustomerByChat(inMessage).getName() + "\n" + Messages.ENTRY.getText(), inMessage);
+                    case "Вход" : sendMessage(inMessage,"Привет, " + getCustomerByChat(inMessage).getName() + "\n" + Messages.ENTRY.getText());
                         break;
                     case "Семья" :
-                        sendMessage(botService.getFamilyInfo(getCustomerByChat(inMessage)), inMessage);
+                        sendMessage(inMessage, botService.getFamilyInfo(getCustomerByChat(inMessage)));
+                        sendMessage(inMessage, Messages.HOMEFAMILY.getText());
+                        setCondition(inMessage, 2);
                         break;
                     case "Добавить покупку" :
-                        sendMessage(Messages.ADDBUY.getText(), inMessage);
+                        sendMessage(inMessage, Messages.ADDBUY.getText());
                         setCondition(inMessage, 1);
                         break;
-                    default : sendMessage(Messages.SENDELSE.getText(), inMessage);
+                    default : sendMessage(inMessage, Messages.SENDELSE.getText());
                 }
                 break;
     //добавление покупки
             case 1:
                 switch (inMessage.getText()) {
                     case "Отмена":
-                        sendMessage(Messages.CANCEL.getText(), inMessage);
+                        sendMessage(inMessage, Messages.CANCEL.getText());
                         setCondition(inMessage, 0);
                         break;
                     default:
-                        sendMessage(botBuyService.addBuy(inMessage.getText(), getCustomerByChat(inMessage)), inMessage);
+                        sendMessage(inMessage, botBuyService.addBuy(inMessage.getText(), getCustomerByChat(inMessage)));
                         setCondition(inMessage, 0);
                         break;
                 }
                 break;
+            case 2:
+                switch (inMessage.getText()) {
+                    case "Ок":
+                        sendMessage(inMessage, Messages.HOME.getText());
+                        setCondition(inMessage, 0);
+                        break;
+                    case "Покупки":
+                        sendMessage(inMessage, botBuyService.getBuyByLastMonth(getCustomerByChat(inMessage)));
+                        sendMessage(inMessage, Messages.HOME.getText());
+                        setCondition(inMessage, 0);
+                        break;
+                    default:
+                        sendMessage(inMessage, Messages.SENDELSE.getText());
+                        setCondition(inMessage, 0);
+                        break;
+                }
             default:
                 setCondition(inMessage, 0);
         }
@@ -100,7 +118,7 @@ public class Bot extends TelegramLongPollingBot {
             Optional<Customer> customerFromDB = botService.authorization(inMessage);
 
             if (customerFromDB.isEmpty()) {
-                sendMessage(Messages.AUTHORIZATIONERROR.getText(), inMessage);
+                sendMessage(inMessage, Messages.AUTHORIZATIONERROR.getText());
                 throw new NoSuchElementException("Customer not found");
             }
             state.put(inMessage.getChatId(), new ChatInfo(0,customerFromDB.get()));
@@ -111,7 +129,7 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
     //функция отправки сообщения
-    public void sendMessage(String text, Message inMessage) throws TelegramApiException {
+    public void sendMessage(Message inMessage, String text) throws TelegramApiException {
         try {
             SendMessage outMessage = new SendMessage();
             outMessage.setChatId(inMessage.getChatId());
