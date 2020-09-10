@@ -13,10 +13,15 @@ public class BotBuyService {
     @Autowired
     BuyService buyService;
 
-    public String addBuy(String inMessage, Customer customer){
-        System.out.println(inMessage);
-        BigDecimal price = new BigDecimal(inMessage);
-        buyService.saveBuy(new Buy(customer, price));
-        return "Готово!";
+    public String addBuy(String inMessage, Customer customer) throws NumberFormatException{
+        try {
+            System.out.println(inMessage);
+            BigDecimal price = new BigDecimal(inMessage);
+            buyService.saveBuy(new Buy(customer, price));
+            return "Готово!";
+        }
+        catch (NumberFormatException e){
+            return "Ошибка! Введено не число";
+        }
     }
 }

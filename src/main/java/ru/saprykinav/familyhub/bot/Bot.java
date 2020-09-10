@@ -13,8 +13,7 @@ import ru.saprykinav.familyhub.bot.service.BotBuyService;
 import ru.saprykinav.familyhub.entity.Customer;
 import ru.saprykinav.familyhub.service.CustomerService;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
@@ -26,9 +25,7 @@ public class Bot extends TelegramLongPollingBot {
     @Autowired
     BotBuyService botBuyService;
 
-    private Long chat_id = Long.valueOf(0);
-    private Customer customer;
-    private int state = 0;
+    private Map<Long, ChatInfo> state = new HashMap<>();
 
     public void onUpdateReceived(Update update) {
         try {
@@ -38,7 +35,7 @@ public class Bot extends TelegramLongPollingBot {
                 Message inMessage = update.getMessage();
                 System.out.println(inMessage.getText());
                 //проверяем авторизован ли пользователь
-                if(!inMessage.getChatId().equals(chat_id)) {
+                if(!state.containsKey(inMessage.getChatId())) {
                     authorization(inMessage);
                 }
                 //обрабатываем команду
@@ -61,38 +58,40 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     public void input(Message inMessage) throws TelegramApiException, NotFoundException {
-        switch (state){
+        switch (getConditionByChat(inMessage)){
             case 0:
                 switch (inMessage.getText()) {
                     case "/help" :
                     case "Помощь" :
-                        sendMessage(Messages.HELP.getText());
+                        sendMessage(Messages.HELP.getText(), inMessage);
                         break;
-                    case "Вход" : sendMessage("Привет, " + customer.getName() + "\n" + Messages.ENTRY.getText());
+                    case "Вход" : sendMessage("Привет, " + getCustomerByChat(inMessage).getName() + "\n" + Messages.ENTRY.getText(), inMessage);
                         break;
                     case "Семья" :
-                        sendMessage(botService.getFamilyInfo(customer));
+                        sendMessage(botService.getFamilyInfo(getCustomerByChat(inMessage)), inMessage);
                         break;
                     case "Добавить покупку" :
-                        sendMessage(Messages.ADDBUY.getText());
-                        state = 1;
+                        sendMessage(Messages.ADDBUY.getText(), inMessage);
+                        setCondition(inMessage, 1);
                         break;
-                    case "Кто я" : sendMessage(customer.getName());
-                        break;
-                    default : sendMessage(Messages.SENDELSE.getText());
+                    default : sendMessage(Messages.SENDELSE.getText(), inMessage);
                 }
                 break;
+    //добавление покупки
             case 1:
                 switch (inMessage.getText()) {
                     case "Отмена":
-                        sendMessage(Messages.CANCEL.getText());
-                        state = 0;
+                        sendMessage(Messages.CANCEL.getText(), inMessage);
+                        setCondition(inMessage, 0);
                         break;
                     default:
-                        sendMessage(botBuyService.addBuy(inMessage.getText(),customer));
-                        state = 0;
+                        sendMessage(botBuyService.addBuy(inMessage.getText(), getCustomerByChat(inMessage)), inMessage);
+                        setCondition(inMessage, 0);
                         break;
                 }
+                break;
+            default:
+                setCondition(inMessage, 0);
         }
     }
     //функция авторизации и ее проверки.
@@ -101,11 +100,10 @@ public class Bot extends TelegramLongPollingBot {
             Optional<Customer> customerFromDB = botService.authorization(inMessage);
 
             if (customerFromDB.isEmpty()) {
-                sendMessage(Messages.AUTHORIZATIONERROR.getText());
+                sendMessage(Messages.AUTHORIZATIONERROR.getText(), inMessage);
                 throw new NoSuchElementException("Customer not found");
             }
-            customer = customerFromDB.get();
-            chat_id = inMessage.getChatId();
+            state.put(inMessage.getChatId(), new ChatInfo(0,customerFromDB.get()));
             input(inMessage);
         }
         catch (TelegramApiException | NotFoundException e){
@@ -113,15 +111,24 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
     //функция отправки сообщения
-    public void sendMessage(String text) throws TelegramApiException {
+    public void sendMessage(String text, Message inMessage) throws TelegramApiException {
         try {
             SendMessage outMessage = new SendMessage();
-            outMessage.setChatId(chat_id);
+            outMessage.setChatId(inMessage.getChatId());
             outMessage.setText(text);
             execute(outMessage);
         }
         catch (TelegramApiException e){
             e.printStackTrace();
         }
+    }
+    public Customer getCustomerByChat(Message inMessage){
+        return state.get(inMessage.getChatId()).getCustomer();
+    }
+    public Integer getConditionByChat(Message inMessage) {
+        return state.get(inMessage.getChatId()).getCondition();
+    }
+    public void setCondition(Message inMessage, int condition){
+        state.get(inMessage.getChatId()).setCondition(condition);
     }
 }
