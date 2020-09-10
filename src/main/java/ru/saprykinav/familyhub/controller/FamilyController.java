@@ -20,7 +20,7 @@ public class FamilyController {
     public ResponseEntity<Family> setMandatorySpending(@RequestBody Family family) throws NotFoundException {
         familyService.save(family);
         try {
-        return ResponseEntity.ok(familyService.findByFamilyId(family.getId()));
+        return ResponseEntity.ok(familyService.loadByFamilyId(family.getId()));
         } catch (NotFoundException e){
             e.printStackTrace();
             return new ResponseEntity("Family not found", HttpStatus.BAD_REQUEST);
@@ -29,12 +29,12 @@ public class FamilyController {
     @GetMapping("/")
     public ResponseEntity<Family> findFamilyByCustomerId(@AuthenticationPrincipal Customer customer) throws NotFoundException {
         try {
-            Family familyFromDB = familyService.findByFamilyId(customer.getFamily().getId());
+            Family familyFromDB = familyService.loadByFamilyId(customer.getFamily().getId());
             return ResponseEntity.ok(familyFromDB);
 
         } catch (NotFoundException e) {
             e.printStackTrace();
-            return new ResponseEntity("huy", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity("Family not found", HttpStatus.BAD_REQUEST);
         }
     }
 

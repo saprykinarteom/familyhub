@@ -8,7 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Setter
@@ -33,5 +33,12 @@ public class Family implements Serializable {
 
     @Transient
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
-    private Set<Customer> customers;
+    private List<Customer> customers;
+
+    @Override
+    public String toString() {
+        return  "Покупки за последний месяц " + lastMonthBuys +
+                "Плата за квартиру" + mandatorySpending +
+                "Мы" + customers;
+    }
 }
