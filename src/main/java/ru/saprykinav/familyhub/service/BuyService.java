@@ -9,7 +9,6 @@ import ru.saprykinav.familyhub.repository.BuyRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class BuyService  {
@@ -35,11 +34,14 @@ public class BuyService  {
     public Buy saveBuy (Buy buy) {
             return buyRepository.save(buy);
     }
-    public BigDecimal getLastMonthBuys (Long customerId)  {
+    public BigDecimal getSumLastMonthBuys (Long customerId)  {
         LocalDate dateFrom = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
         LocalDate dateTo = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
-        Optional<BigDecimal> lastMonthBuys = buyRepository.findSumPriceAllByCustomerIdAndDateBetween(customerId, dateFrom, dateTo);
-        if(lastMonthBuys.isEmpty()) lastMonthBuys = Optional.of(BigDecimal.valueOf(0));
-        return lastMonthBuys.get();
+        BigDecimal sumLastMonthBuys = buyRepository.findSumPriceAllByCustomerIdAndDateBetween(customerId, dateFrom, dateTo).orElse(BigDecimal.ZERO);
+        return sumLastMonthBuys;
+    }
+    public BigDecimal getSumBuysByDatePeriod(Long customerId, LocalDate dateFrom, LocalDate dateTo){
+        BigDecimal sumBuysByDatePeriod = buyRepository.findSumPriceAllByCustomerIdAndDateBetween(customerId, dateFrom, dateTo).orElse(BigDecimal.ZERO);
+        return sumBuysByDatePeriod;
     }
 }

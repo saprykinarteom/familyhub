@@ -14,5 +14,4 @@ public interface FamilyRepository extends JpaRepository<Family, Long> {
     @Query(value = "select sum(Buy.price) from Buy where (Buy.customer_id IN (select Customer.id from Customer where Customer.family_id = :family_id) and (Buy.date between :date_from and :date_to))", nativeQuery = true)
     Optional<BigDecimal> findSumPriceAllByFamilyByCustomerIdAndDateBetween (@Param("family_id") Long familyId, @Param("date_from") LocalDate dateFrom, @Param("date_to") LocalDate dateTo);
 
-
 }

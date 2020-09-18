@@ -10,20 +10,28 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.saprykinav.familyhub.bot.service.BotBuyService;
+import ru.saprykinav.familyhub.bot.service.BotFamilyService;
 import ru.saprykinav.familyhub.entity.Customer;
 import ru.saprykinav.familyhub.service.CustomerService;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Component
 public class Bot extends TelegramLongPollingBot {
 
-    @Autowired
-    BotService botService;
-    @Autowired
-    CustomerService customerService;
-    @Autowired
-    BotBuyService botBuyService;
+
+    private final BotService botService;
+    private final CustomerService customerService;
+    private final BotBuyService botBuyService;
+    private final BotFamilyService botFamilyService;
+
+    public Bot(BotService botService, CustomerService customerService, BotBuyService botBuyService, BotFamilyService botFamilyService){
+        this.botService = botService;
+        this.customerService = customerService;
+        this.botBuyService = botBuyService;
+        this.botFamilyService = botFamilyService;
+    }
 
     private Map<Long, ChatInfo> state = new HashMap<>();
 
@@ -103,6 +111,15 @@ public class Bot extends TelegramLongPollingBot {
                         sendMessage(inMessage, Messages.HOME.getText());
                         setCondition(inMessage, 0);
                         break;
+                    case "Заплатили":
+                        sendMessage(inMessage, botFamilyService.setLastPayDay(getCustomerByChat(inMessage).getFamily().getId(), LocalDate.now()));
+                        setCondition(inMessage, 0);
+                        break;
+                    case "Пора платить":
+                        sendMessage(inMessage, botService.getPayInfo(getCustomerByChat(inMessage)));
+                        sendMessage(inMessage, Messages.HOME.getText());
+                        setCondition(inMessage, 0);
+                        break;
                     default:
                         sendMessage(inMessage, Messages.SENDELSE.getText());
                         setCondition(inMessage, 0);
@@ -115,17 +132,13 @@ public class Bot extends TelegramLongPollingBot {
     //функция авторизации и ее проверки.
     public void authorization(Message inMessage) throws NoSuchElementException, TelegramApiException {
         try {
-            Optional<Customer> customerFromDB = botService.authorization(inMessage);
-
-            if (customerFromDB.isEmpty()) {
-                sendMessage(inMessage, Messages.AUTHORIZATIONERROR.getText());
-                throw new NoSuchElementException("Customer not found");
-            }
-            state.put(inMessage.getChatId(), new ChatInfo(0,customerFromDB.get()));
+            Customer customerFromDB = botService.authorization(inMessage);
+            state.put(inMessage.getChatId(), new ChatInfo(0,customerFromDB));
             input(inMessage);
         }
-        catch (TelegramApiException | NotFoundException e){
+        catch (TelegramApiException | RuntimeException | NotFoundException e){
             e.printStackTrace();
+            sendMessage(inMessage, Messages.AUTHORIZATIONERROR.getText());
         }
     }
     //функция отправки сообщения
