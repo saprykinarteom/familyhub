@@ -11,7 +11,6 @@ import ru.saprykinav.familyhub.repository.FamilyRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class FamilyService {
@@ -25,20 +24,18 @@ public class FamilyService {
         return true;
     }
     public Family loadByFamilyId(Long familyId) throws NotFoundException {
-        Optional<Family> familyFromDb = familyRepository.findById(familyId);
-        if(familyFromDb.isEmpty()){
-            throw new NotFoundException("Family not found");
-        }
-        //расчет покупок за последний месяц
-        LocalDate dateFrom = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
-        LocalDate dateTo = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), LocalDate.now().getDayOfMonth());
-        Optional<BigDecimal> sumBuysFromDB = familyRepository.findSumPriceAllByFamilyByCustomerIdAndDateBetween(familyId,dateFrom, dateTo);
-        if(sumBuysFromDB.isEmpty()) sumBuysFromDB = Optional.of(BigDecimal.ZERO);
-        familyFromDb.get().setLastMonthBuys(sumBuysFromDB.get());
-
+        Family familyFromDb = familyRepository.findById(familyId).orElseThrow(RuntimeException::new);
+        //расчет покупок, совершенных после последнего дня платежа
+        BigDecimal sumBuysFromDB = familyRepository.findSumPriceAllByFamilyByCustomerIdAndDateBetween(familyId,familyFromDb.getLastPayDay(), LocalDate.now()).orElse(BigDecimal.ZERO);
+        familyFromDb.setSumBuysAfterLastPayDay(sumBuysFromDB);
         //подгрузка списка членов семьи
         List<Customer> customersFromDB = customerRepository.findAllByFamilyId(familyId);
-        familyFromDb.get().setCustomers(customersFromDB);
-        return familyFromDb.get();
+        familyFromDb.setCustomers(customersFromDB);
+        return familyFromDb;
+    }
+    public void setLastPayDay(Long familyId, LocalDate lastPayDay) {
+        Family familyFromDb = familyRepository.findById(familyId).orElseThrow(RuntimeException::new);
+        familyFromDb.setLastPayDay(lastPayDay);
+        familyRepository.save(familyFromDb);
     }
 }

@@ -40,7 +40,7 @@ public class BuyController {
     }
     @GetMapping("/last/sum")
     public ResponseEntity<BigDecimal> getSumAllInLastMount(@AuthenticationPrincipal Customer customer){
-          return ResponseEntity.ok(buyService.getLastMonthBuys(customer.getId()));
+          return ResponseEntity.ok(buyService.getSumLastMonthBuys(customer.getId()));
     }
 
     @PostMapping("/add")
