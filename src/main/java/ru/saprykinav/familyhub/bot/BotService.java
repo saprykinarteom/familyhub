@@ -46,12 +46,12 @@ public class BotService {
             BigDecimal sumBuysByMemberOne = botBuyService.getSumBuysByCustomerAfterLastPayDay(familyMemberOne);
             BigDecimal sumBuysByMemberTwo = botBuyService.getSumBuysByCustomerAfterLastPayDay(familyMemberTwo);
 
-            BigDecimal temp1 = sumBuysByMemberOne.divide(BigDecimal.valueOf(2));
-            BigDecimal temp2 = sumBuysByMemberTwo.divide(BigDecimal.valueOf(2));
+            BigDecimal temp1 = sumBuysByMemberOne.subtract(sumBuysByMemberTwo);
+            BigDecimal temp2 = sumBuysByMemberTwo.subtract(sumBuysByMemberOne);
             BigDecimal temp3 = customer.getFamily().getMandatorySpending().divide(BigDecimal.valueOf(2));
 
-            BigDecimal debtMemberOne = temp3.subtract(temp1).subtract(temp2);
-            BigDecimal debtMemberTwo = temp3.subtract(debtMemberOne);
+            BigDecimal debtMemberOne = temp3.subtract(temp1);
+            BigDecimal debtMemberTwo = temp3.subtract(temp2);
 
             String text = "Нужно заплатить " + customer.getFamily().getMandatorySpending()
                     + "\nпокупки за месяц : \n"
