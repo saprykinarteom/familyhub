@@ -50,8 +50,12 @@ public class BotService {
             BigDecimal temp2 = sumBuysByMemberTwo.subtract(sumBuysByMemberOne);
             BigDecimal temp3 = customer.getFamily().getMandatorySpending().divide(BigDecimal.valueOf(2));
 
-            BigDecimal debtMemberOne = temp3.subtract(temp1);
-            BigDecimal debtMemberTwo = temp3.subtract(temp2);
+            BigDecimal debtMemberOneTemp = temp3.subtract(temp1);
+            BigDecimal debtMemberTwoTemp = temp3.subtract(temp2);
+
+            BigDecimal debtMemberOne = debtMemberOneTemp.divide(BigDecimal.valueOf(2));
+            BigDecimal debtMemberTwo = debtMemberTwoTemp.divide(BigDecimal.valueOf(2));
+
 
             String text = "Нужно заплатить " + customer.getFamily().getMandatorySpending()
                     + "\nпокупки за месяц : \n"
