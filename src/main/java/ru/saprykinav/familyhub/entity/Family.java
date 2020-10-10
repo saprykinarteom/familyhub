@@ -39,6 +39,10 @@ public class Family implements Serializable {
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
     private List<Customer> customers;
 
+    @Transient
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+    private List<Order> orders;
+
     @Override
     public String toString() {
         return  "Покупки за последний месяц " + sumBuysAfterLastPayDay +
