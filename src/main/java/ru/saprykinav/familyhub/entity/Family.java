@@ -41,7 +41,7 @@ public class Family implements Serializable {
     private List<Customer> customers;
 
     @OneToMany(mappedBy = "family", fetch = FetchType.EAGER)
-    private List<Item> items = new LinkedList<>();
+    private List<Wishlist> wishlists;
 
     @Override
     public String toString() {

@@ -21,7 +21,7 @@ public class Item implements Serializable {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    private Family family;
+    private Wishlist wishlist;
 
     @Column(name = "name")
     private String name;
@@ -33,8 +33,8 @@ public class Item implements Serializable {
     @Column(name = "state")
     private Integer state;
 
-    public Item(Family family, String name, String quantity) {
-        this.family = family;
+    public Item(Wishlist wishlist, String name, String quantity) {
+        this.wishlist = wishlist;
         this.name = name;
         this.quantity = quantity;
     }
