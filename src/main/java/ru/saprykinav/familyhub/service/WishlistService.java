@@ -1,7 +1,6 @@
 package ru.saprykinav.familyhub.service;
 
 import org.springframework.stereotype.Service;
-import ru.saprykinav.familyhub.entity.Wishlist;
 import ru.saprykinav.familyhub.repository.WishlistRepository;
 
 @Service
