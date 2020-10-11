@@ -4,6 +4,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.io.Serializable;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Order implements Serializable {
+public class Item implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     @Id
     @Column(name = "id")
@@ -22,8 +23,8 @@ public class Order implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     private Family family;
 
-    @Column(name = "item")
-    private String item;
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "quantity")
     private String quantity;
@@ -32,9 +33,9 @@ public class Order implements Serializable {
     @Column(name = "state")
     private Integer state;
 
-    public Order(Family family, String item, String quantity) {
+    public Item(Family family, String name, String quantity) {
         this.family = family;
-        this.item = item;
+        this.name = name;
         this.quantity = quantity;
     }
 
