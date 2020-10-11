@@ -37,6 +37,7 @@ public class Item implements Serializable {
         this.wishlist = wishlist;
         this.name = name;
         this.quantity = quantity;
+        this.state = 0;
     }
 
 }
