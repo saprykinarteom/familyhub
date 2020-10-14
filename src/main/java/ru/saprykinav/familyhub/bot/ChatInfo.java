@@ -15,6 +15,7 @@ import ru.saprykinav.familyhub.entity.Customer;
 public class ChatInfo {
     private Integer condition;
     private Customer customer;
+    private String whishlistId;
 
     public ChatInfo(int condition, Customer customer){
         this.condition = condition;

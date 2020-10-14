@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.saprykinav.familyhub.bot.service.BotBuyService;
 import ru.saprykinav.familyhub.bot.service.BotFamilyService;
+import ru.saprykinav.familyhub.bot.service.BotWishlistService;
 import ru.saprykinav.familyhub.entity.Customer;
 import ru.saprykinav.familyhub.service.CustomerService;
 
@@ -25,12 +26,14 @@ public class Bot extends TelegramLongPollingBot {
     private final CustomerService customerService;
     private final BotBuyService botBuyService;
     private final BotFamilyService botFamilyService;
+    private final BotWishlistService botWishlistService;
 
-    public Bot(BotService botService, CustomerService customerService, BotBuyService botBuyService, BotFamilyService botFamilyService){
+    public Bot(BotService botService, CustomerService customerService, BotBuyService botBuyService, BotFamilyService botFamilyService, BotWishlistService botWishlistService){
         this.botService = botService;
         this.customerService = customerService;
         this.botBuyService = botBuyService;
         this.botFamilyService = botFamilyService;
+        this.botWishlistService = botWishlistService;
     }
 
     private Map<Long, ChatInfo> state = new HashMap<>();
@@ -73,8 +76,6 @@ public class Bot extends TelegramLongPollingBot {
                     case "Помощь" :
                         sendMessage(inMessage, Messages.HELP.getText());
                         break;
-                    case "Вход" : sendMessage(inMessage,"Привет, " + getCustomerByChat(inMessage).getName() + "\n" + Messages.ENTRY.getText());
-                        break;
                     case "Семья" :
                         sendMessage(inMessage, botService.getFamilyInfo(getCustomerByChat(inMessage)));
                         sendMessage(inMessage, Messages.HOMEFAMILY.getText());
@@ -83,6 +84,12 @@ public class Bot extends TelegramLongPollingBot {
                     case "Добавить покупку" :
                         sendMessage(inMessage, Messages.ADDBUY.getText());
                         setCondition(inMessage, 1);
+                        break;
+                    case "В магазине" :
+                    case "/shop":
+                        sendMessage(inMessage,botWishlistService.loadWishlists(getCustomerByChat(inMessage)));
+                        sendMessage(inMessage, Messages.SHOP.getText());
+                        setCondition(inMessage, 3);
                         break;
                     default : sendMessage(inMessage, Messages.SENDELSE.getText());
                 }
@@ -125,6 +132,32 @@ public class Bot extends TelegramLongPollingBot {
                         setCondition(inMessage, 0);
                         break;
                 }
+            case 3:
+                switch (inMessage.getText()) {
+                    case "Отмена":
+                        sendMessage(inMessage, Messages.CANCEL.getText());
+                        setCondition(inMessage, 0);
+                        break;
+                    default:
+                        sendMessage(inMessage, botWishlistService.loadWishlist(inMessage.getText()));
+                        setWhishlistId(inMessage);
+                        sendMessage(inMessage, Messages.WISHLIST.getText());
+                        setCondition(inMessage, 4);
+                        break;
+                }
+                break;
+            case 4:
+                switch (inMessage.getText()) {
+                    case "Назад":
+                        sendMessage(inMessage, Messages.CANCEL.getText());
+                        setCondition(inMessage, 3);
+                        break;
+                    default:
+                        sendMessage(inMessage, botWishlistService.closeItem(inMessage.getText()));
+                        sendMessage(inMessage, botWishlistService.loadWishlist(state.get(inMessage.getChatId()).getWhishlistId()));
+                        break;
+                }
+                break;
             default:
                 setCondition(inMessage, 0);
         }
@@ -161,5 +194,8 @@ public class Bot extends TelegramLongPollingBot {
     }
     public void setCondition(Message inMessage, int condition){
         state.get(inMessage.getChatId()).setCondition(condition);
+    }
+    public void setWhishlistId(Message inMessage){
+        state.get(inMessage.getChatId()).setWhishlistId(inMessage.getText());
     }
 }

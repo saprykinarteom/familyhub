@@ -15,12 +15,24 @@ public class Wishlist implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @Transient
     @OneToMany(mappedBy = "wishlist", fetch = FetchType.EAGER)
     private List<Item> items = new LinkedList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
-    private Family family;
+    private Family owner;
 
     @Column(name="name")
     private String name;
+
+    public Wishlist(Family owner, String name){
+        this.owner = owner;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return id + " " + name + '\''  +
+                items;
+    }
 }

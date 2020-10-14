@@ -40,4 +40,9 @@ public class Item implements Serializable {
         this.state = 0;
     }
 
+    @Override
+    public String toString() {
+        return  id +
+                " " +  name + " " + quantity + '\'' ;
+    }
 }
