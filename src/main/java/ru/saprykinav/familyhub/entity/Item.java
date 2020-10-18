@@ -39,6 +39,10 @@ public class Item implements Serializable {
         this.quantity = quantity;
         this.state = 0;
     }
+    public Item(String name){
+        this.name = name;
+        this.state = 0;
+    }
 
     @Override
     public String toString() {

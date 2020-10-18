@@ -1,6 +1,7 @@
 package ru.saprykinav.familyhub.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class Wishlist implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

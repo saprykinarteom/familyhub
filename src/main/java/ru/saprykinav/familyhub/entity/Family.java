@@ -40,7 +40,7 @@ public class Family implements Serializable {
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
     private List<Customer> customers;
 
-    @OneToMany(mappedBy = "family", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER)
     private List<Wishlist> wishlists;
 
     @Override

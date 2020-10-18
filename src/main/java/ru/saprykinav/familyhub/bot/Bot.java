@@ -13,8 +13,11 @@ import ru.saprykinav.familyhub.bot.service.BotBuyService;
 import ru.saprykinav.familyhub.bot.service.BotFamilyService;
 import ru.saprykinav.familyhub.bot.service.BotWishlistService;
 import ru.saprykinav.familyhub.entity.Customer;
+import ru.saprykinav.familyhub.entity.Item;
+import ru.saprykinav.familyhub.entity.Wishlist;
 import ru.saprykinav.familyhub.service.CustomerService;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -85,11 +88,20 @@ public class Bot extends TelegramLongPollingBot {
                         sendMessage(inMessage, Messages.ADDBUY.getText());
                         setCondition(inMessage, 1);
                         break;
+                    case "Список покупок" :
+                        sendMessage(inMessage, botWishlistService.loadWishlists(getCustomerByChat(inMessage)));
+                        sendMessage(inMessage, Messages.SHOP.getText());
+                        setCondition(inMessage, 5);
+                        break;
                     case "В магазине" :
                     case "/shop":
                         sendMessage(inMessage,botWishlistService.loadWishlists(getCustomerByChat(inMessage)));
                         sendMessage(inMessage, Messages.SHOP.getText());
                         setCondition(inMessage, 3);
+                        break;
+                    case "999":
+                        setCondition(inMessage, 999);
+                        sendMessage(inMessage, Messages.ADMIN.getText());
                         break;
                     default : sendMessage(inMessage, Messages.SENDELSE.getText());
                 }
@@ -107,6 +119,7 @@ public class Bot extends TelegramLongPollingBot {
                         break;
                 }
                 break;
+    //страница семьи
             case 2:
                 switch (inMessage.getText()) {
                     case "Ок":
@@ -132,6 +145,8 @@ public class Bot extends TelegramLongPollingBot {
                         setCondition(inMessage, 0);
                         break;
                 }
+                break;
+    //выбор листа покупок, находясь в магазине
             case 3:
                 switch (inMessage.getText()) {
                     case "Отмена":
@@ -139,27 +154,119 @@ public class Bot extends TelegramLongPollingBot {
                         setCondition(inMessage, 0);
                         break;
                     default:
-                        sendMessage(inMessage, botWishlistService.loadWishlist(inMessage.getText()));
-                        setWhishlistId(inMessage);
-                        sendMessage(inMessage, Messages.WISHLIST.getText());
-                        setCondition(inMessage, 4);
+                        Serializable answer = botWishlistService.loadWishlist(inMessage.getText());
+                        if(answer instanceof Wishlist){
+                            setWishlist(inMessage, (Wishlist) answer);
+                            sendMessage(inMessage, answer.toString());
+                            setCondition(inMessage, 4);
+                            sendMessage(inMessage, Messages.WISHLIST.getText());
+                        }
+                        else{
+                            sendMessage(inMessage, (String) answer);
+                        }
                         break;
                 }
                 break;
+    //закрытие пункта в списке
             case 4:
                 switch (inMessage.getText()) {
                     case "Назад":
                         sendMessage(inMessage, Messages.CANCEL.getText());
                         setCondition(inMessage, 3);
                         break;
+                    case "Закончить":
+                        sendMessage(inMessage, botWishlistService.loadWishlist(getWishlist(inMessage)));
+                        sendNotificationToFamily("Обновлен лист покупок " + getWishlist(inMessage).getName());
+                        setCondition(inMessage, 0);
+                        break;
                     default:
                         sendMessage(inMessage, botWishlistService.closeItem(inMessage.getText()));
-                        sendMessage(inMessage, botWishlistService.loadWishlist(state.get(inMessage.getChatId()).getWhishlistId()));
+                        sendMessage(inMessage, botWishlistService.loadWishlist(getWishlist(inMessage)));
+                        break;
+                }
+                break;
+
+    //выбор листа покупок
+            case 5:
+                switch (inMessage.getText()) {
+                    case "Отмена":
+                        sendMessage(inMessage, Messages.CANCEL.getText());
+                        setCondition(inMessage, 0);
+                        break;
+                    default:
+                        Serializable answer = botWishlistService.loadWishlist(inMessage.getText());
+                        if(answer instanceof Wishlist){
+                            setWishlist(inMessage, (Wishlist) answer);
+                            sendMessage(inMessage, answer.toString());
+                            setCondition(inMessage, 6);
+                            sendMessage(inMessage, Messages.CREATEITEM.getText());
+                        }
+                        else{
+                            sendMessage(inMessage, (String) answer);
+                        }
+                        break;
+                }
+                break;
+    //ввод имени покупки
+            case 6:
+                switch (inMessage.getText()) {
+                    case "Отмена":
+                        sendMessage(inMessage, Messages.CANCEL.getText());
+                        setCondition(inMessage, 0);
+                        break;
+                    case "Закончить":
+                        sendMessage(inMessage, botWishlistService.loadWishlist(getWishlist(inMessage)));
+                        sendNotificationToFamily("Обновлен лист покупок " + getWishlist(inMessage).getName());
+                        setCondition(inMessage, 0);
+                        break;
+                    default:
+                        setItem(inMessage, botWishlistService.createItem(inMessage.getText()));
+                        sendMessage(inMessage, Messages.ADDQUANTITYITEM.getText());
+                        setCondition(inMessage, 7);
+                        break;
+                }
+            break;
+    //ввод количества покупки
+            case 7:
+                switch ((inMessage.getText())){
+                    case "Отмена":
+                        sendMessage(inMessage, Messages.CANCEL.getText());
+                        setCondition(inMessage, 0);
+                        break;
+                    default:
+                        sendMessage(inMessage, botWishlistService.createItem(getItem(inMessage), getWishlist(inMessage), inMessage.getText()));
+                        sendMessage(inMessage, Messages.CONTINUECREATEITEMS.getText());
+                        setCondition(inMessage, 6);
+                        break;
+                }
+                break;
+    //admin
+            case 999:
+                switch ((inMessage.getText())) {
+                    case "addList":
+                        setCondition(inMessage,9991);
+                        sendMessage(inMessage, "name");
+                        break;
+                    default:
+                        setCondition(inMessage, 0);
+                        break;
+                }
+                break;
+    //add list
+            case 9991:
+                switch ((inMessage.getText())) {
+                    case "Отмена":
+                        setCondition(inMessage,0);
+                        break;
+                    default:
+                        sendMessage(inMessage, botWishlistService.addWishlist(getCustomerByChat(inMessage), inMessage.getText()).toString());
+                        setCondition(inMessage, 0);
                         break;
                 }
                 break;
             default:
                 setCondition(inMessage, 0);
+                break;
         }
     }
     //функция авторизации и ее проверки.
@@ -168,6 +275,7 @@ public class Bot extends TelegramLongPollingBot {
             Customer customerFromDB = botService.authorization(inMessage);
             state.put(inMessage.getChatId(), new ChatInfo(0,customerFromDB));
             input(inMessage);
+            System.out.println(inMessage.getChatId());
         }
         catch (TelegramApiException | RuntimeException | NotFoundException e){
             e.printStackTrace();
@@ -186,6 +294,19 @@ public class Bot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
+    public void sendNotificationToFamily (String text) throws TelegramApiException{
+        try {
+            SendMessage outMessage = new SendMessage();
+            outMessage.setText(text);
+            outMessage.setChatId((long) 338011120);
+            execute(outMessage);
+            outMessage.setChatId((long) 139381254);
+            execute(outMessage);
+        }
+        catch (TelegramApiException e){
+            e.printStackTrace();
+        }
+    }
     public Customer getCustomerByChat(Message inMessage){
         return state.get(inMessage.getChatId()).getCustomer();
     }
@@ -195,7 +316,16 @@ public class Bot extends TelegramLongPollingBot {
     public void setCondition(Message inMessage, int condition){
         state.get(inMessage.getChatId()).setCondition(condition);
     }
-    public void setWhishlistId(Message inMessage){
-        state.get(inMessage.getChatId()).setWhishlistId(inMessage.getText());
+    public void setWishlist(Message inMessage, Wishlist wishlist){
+        state.get(inMessage.getChatId()).setWishlist(wishlist);
+    }
+    public void setItem(Message inMessage, Item item){
+        state.get(inMessage.getChatId()).setItem(item);
+    }
+    public Wishlist getWishlist(Message inMessage) {
+        return state.get(inMessage.getChatId()).getWishlist();
+    }
+    public Item getItem(Message inMessage) {
+        return state.get(inMessage.getChatId()).getItem();
     }
 }
