@@ -183,7 +183,7 @@ public class Bot extends TelegramLongPollingBot {
                         setCondition(inMessage, 0);
                         break;
                     case "Закончить":
-                        sendMessage(inMessage, botWishlistService.loadWishlist(getWishlist(inMessage)));
+                        setWishlist(inMessage, (Wishlist) botWishlistService.loadWishlist("1"));
                         sendNotificationToFamily("Что-то куплено из списка. Осталось купить:  " + getWishlist(inMessage).toString());
                         sendMessage(inMessage, "Добавим покупку в бюджет? Напиши сколько она стоила ");
                         setCondition(inMessage, 1);
@@ -224,7 +224,7 @@ public class Bot extends TelegramLongPollingBot {
                         setCondition(inMessage, 0);
                         break;
                     case "Закончить":
-                        sendMessage(inMessage, botWishlistService.loadWishlist(getWishlist(inMessage)));
+                        setWishlist(inMessage, (Wishlist) botWishlistService.loadWishlist("1"));
                         sendNotificationToFamily("Обновлен лист покупок " + getWishlist(inMessage).toString());
                         setCondition(inMessage, 0);
                         break;
