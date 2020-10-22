@@ -85,19 +85,27 @@ public class Bot extends TelegramLongPollingBot {
                         setCondition(inMessage, 2);
                         break;
                     case "Добавить покупку" :
+                    case "buy":
                         sendMessage(inMessage, Messages.ADDBUY.getText());
                         setCondition(inMessage, 1);
                         break;
                     case "Список покупок" :
-                        sendMessage(inMessage, botWishlistService.loadWishlists(getCustomerByChat(inMessage)));
-                        sendMessage(inMessage, Messages.SHOP.getText());
-                        setCondition(inMessage, 5);
+                        //для нескольких листов, в текущей версии не используется
+                        //sendMessage(inMessage, botWishlistService.loadWishlists(getCustomerByChat(inMessage)));
+                        //sendMessage(inMessage, Messages.SHOP.getText());
+                        setWishlist(inMessage, (Wishlist) botWishlistService.loadWishlist("1"));
+                        sendMessage(inMessage, getWishlist(inMessage).toString());
+                        sendMessage(inMessage, Messages.CREATEITEM.getText());
+                        setCondition(inMessage, 6);
                         break;
                     case "В магазине" :
                     case "/shop":
-                        sendMessage(inMessage,botWishlistService.loadWishlists(getCustomerByChat(inMessage)));
-                        sendMessage(inMessage, Messages.SHOP.getText());
-                        setCondition(inMessage, 3);
+                        //sendMessage(inMessage,botWishlistService.loadWishlists(getCustomerByChat(inMessage)));
+                        //sendMessage(inMessage, Messages.SHOP.getText());
+                        setWishlist(inMessage, (Wishlist) botWishlistService.loadWishlist("1"));
+                        setCondition(inMessage, 4);
+                        sendMessage(inMessage, Messages.WISHLIST.getText());
+                        sendMessage(inMessage, getWishlist(inMessage).toString());
                         break;
                     case "999":
                         setCondition(inMessage, 999);
@@ -146,7 +154,7 @@ public class Bot extends TelegramLongPollingBot {
                         break;
                 }
                 break;
-    //выбор листа покупок, находясь в магазине
+    //выбор листа покупок, находясь в магазине(в этой версии не используется)
             case 3:
                 switch (inMessage.getText()) {
                     case "Отмена":
@@ -170,14 +178,15 @@ public class Bot extends TelegramLongPollingBot {
     //закрытие пункта в списке
             case 4:
                 switch (inMessage.getText()) {
-                    case "Назад":
+                    case "Отмена":
                         sendMessage(inMessage, Messages.CANCEL.getText());
-                        setCondition(inMessage, 3);
+                        setCondition(inMessage, 0);
                         break;
                     case "Закончить":
                         sendMessage(inMessage, botWishlistService.loadWishlist(getWishlist(inMessage)));
-                        sendNotificationToFamily("Обновлен лист покупок " + getWishlist(inMessage).getName());
-                        setCondition(inMessage, 0);
+                        sendNotificationToFamily("Что-то куплено из списка. Осталось купить:  " + getWishlist(inMessage).toString());
+                        sendMessage(inMessage, "Добавим покупку в бюджет? Напиши сколько она стоила ");
+                        setCondition(inMessage, 1);
                         break;
                     default:
                         sendMessage(inMessage, botWishlistService.closeItem(inMessage.getText()));
@@ -186,7 +195,7 @@ public class Bot extends TelegramLongPollingBot {
                 }
                 break;
 
-    //выбор листа покупок
+    //выбор листа покупок(не используется в этой версии)
             case 5:
                 switch (inMessage.getText()) {
                     case "Отмена":
@@ -216,7 +225,7 @@ public class Bot extends TelegramLongPollingBot {
                         break;
                     case "Закончить":
                         sendMessage(inMessage, botWishlistService.loadWishlist(getWishlist(inMessage)));
-                        sendNotificationToFamily("Обновлен лист покупок " + getWishlist(inMessage).getName());
+                        sendNotificationToFamily("Обновлен лист покупок " + getWishlist(inMessage).toString());
                         setCondition(inMessage, 0);
                         break;
                     default:
@@ -294,6 +303,7 @@ public class Bot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
+    //оповещение всем членам семьи 1 (хардкод на айди чатов)
     public void sendNotificationToFamily (String text) throws TelegramApiException{
         try {
             SendMessage outMessage = new SendMessage();
