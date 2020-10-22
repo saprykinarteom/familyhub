@@ -9,6 +9,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -38,6 +39,9 @@ public class Family implements Serializable {
     @Transient
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
     private List<Customer> customers;
+
+    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER)
+    private List<Wishlist> wishlists;
 
     @Override
     public String toString() {

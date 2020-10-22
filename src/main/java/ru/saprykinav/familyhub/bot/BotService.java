@@ -46,8 +46,8 @@ public class BotService {
             BigDecimal sumBuysByMemberOne = botBuyService.getSumBuysByCustomerAfterLastPayDay(familyMemberOne);
             BigDecimal sumBuysByMemberTwo = botBuyService.getSumBuysByCustomerAfterLastPayDay(familyMemberTwo);
 
-            BigDecimal temp1 = sumBuysByMemberOne.subtract(sumBuysByMemberTwo);
-            BigDecimal temp2 = sumBuysByMemberTwo.subtract(sumBuysByMemberOne);
+            BigDecimal temp1 = sumBuysByMemberOne.subtract(sumBuysByMemberTwo).divide(BigDecimal.valueOf(2));
+            BigDecimal temp2 = sumBuysByMemberTwo.subtract(sumBuysByMemberOne).divide(BigDecimal.valueOf(2));
             BigDecimal temp3 = customer.getFamily().getMandatorySpending().divide(BigDecimal.valueOf(2));
 
             BigDecimal debtMemberOne = temp3.subtract(temp1);
